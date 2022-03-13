@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Put your webhook here.
+export DISCORD_WEBHOOK=https://discord.com/api/webhooks/
+
+./sensor-alerts.py | tee -a 433.log
