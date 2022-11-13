@@ -29,7 +29,7 @@ def get_message(obj):
     if ("id" in obj and "model" in obj and obj["model"] == "Govee-Water" and obj["id"] in DEVICES):
         device = DEVICES[obj["id"]]
         msg = {
-            "content": "<@448074627420258306>: Please read this!",
+            "content": "<@448074627420258306>: **" + obj["event"] + "** - " + device,
             "embeds": [
                 {
                     "title": obj["event"],
@@ -49,24 +49,70 @@ def get_message(obj):
     # I don't know what this is.
     return None
 
+# Construct a Discord-style message for status messages.
+def get_status_message(lines):
+    # TODO: Make sure this isn't longer than 4096 characters.
+    # https://discord.com/developers/docs/resources/channel#embed-object-embed-limits
+    msg = {
+        "content": "<@448074627420258306>: Starting up!",
+        "embeds": [
+            {
+                "title": "Starting Up...",
+                "description": "```\n" + "\n".join(lines) + "\n```",
+                "color": 0x0000FF,
+                "thumbnail": {
+                    "url": "https://m.media-amazon.com/images/I/71Hrs7B6+BL._AC_SX679_.jpg"
+                }
+            }
+        ]
+    }
+    return msg
+
 # Allow for the user to specify the webhook URL in a script or interactively.
 TOKEN = os.getenv('DISCORD_WEBHOOK')
 
+# Buffered-up list of status lines.
+status_lines = []
+
 # Iterate through the JSON-formatted events until the program exits.
-with subprocess.Popen(["rtl_433", "-F", "json"], stdout=subprocess.PIPE) as proc:
+with subprocess.Popen(["rtl_433", "-F", "json"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8") as proc:
     while line := proc.stdout.readline():
+        # Get rid of those annoying newlines.
+        line = line.rstrip()
+
         # Print it.
-        sys.stdout.buffer.write(line)
-        sys.stdout.flush()
+        print(line, flush=True)
+        
+        # At the start of the run, rtl_433 outputs some diagnostic stuff to STDERR (which we've
+        # redirected to STDOUT for convenience).  Ideally, I'd use some sort of timeout, but I
+        # have devices that should send a message every couple minutes, so it shouldn't be necessary.
+        if not line.startswith("{"):
+            status_lines.append(line)
+        else:
+            # Send any status lines to Discord.
+            try:
+                if len(status_lines) > 0:
+                    msg = get_status_message(status_lines)
 
-        try:
-            # Get an event.
-            obj = json.loads(line)
+                    if msg is not None:
+                        req = requests.post(TOKEN, json=msg)
 
-            # Create a Discord message for it (if possible).
-            msg = get_message(obj)
+                    # If this ever happens again, start with an empty list.
+                    status_lines = []
+            except:
+                logging.exception("Failed to send status lines.")
 
-            if msg is not None:
-                req = requests.post(TOKEN, json=msg)
-        except:
-            logging.exception("Failed to process message.")
+            # Send the event to Discord.
+            try:
+                # Get an event.
+                obj = json.loads(line)
+
+                # Create a Discord message for it (if possible).
+                msg = get_message(obj)
+
+                if msg is not None:
+                    req = requests.post(TOKEN, json=msg)
+            except:
+                logging.exception("Failed to process message.")
+
+# I should probably include some notification that the program exited.
