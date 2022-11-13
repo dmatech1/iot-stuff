@@ -1,0 +1,18 @@
+# See: https://wiki.archlinux.org/title/systemd/User
+# Place in "/home/pi/.config/systemd/user/sensor-alerts.service".
+#
+# sudo loginctl enable-linger pi
+# systemctl --user enable sensor-alerts
+
+[Unit]
+Description=RTL-SDR 433MHz Sensor Alert Process
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/433
+ExecStart=/home/pi/433/do-alerts
+Environment="PATH=/home/pi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+[Install]
+WantedBy=default.target
