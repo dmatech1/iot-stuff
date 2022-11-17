@@ -29,7 +29,7 @@ def get_message(obj):
     if ("id" in obj and "model" in obj and obj["model"] == "Govee-Water" and obj["id"] in DEVICES):
         device = DEVICES[obj["id"]]
         msg = {
-            "content": "<@448074627420258306>: **" + obj["event"] + "** - " + device,
+            "content": os.getenv("DISCORD_RECIPIENT", "") + "**" + obj["event"] + "** - " + device,
             "embeds": [
                 {
                     "title": obj["event"],
@@ -54,7 +54,7 @@ def get_status_message(lines):
     # TODO: Make sure this isn't longer than 4096 characters.
     # https://discord.com/developers/docs/resources/channel#embed-object-embed-limits
     msg = {
-        "content": "<@448074627420258306>: Starting up!",
+        "content": os.getenv("DISCORD_RECIPIENT", "") + "Starting up!",
         "embeds": [
             {
                 "title": "Starting Up...",
