@@ -1,0 +1,22 @@
+# See: https://wiki.archlinux.org/title/systemd/User
+# Place in "/home/pi/.config/systemd/user/power-alerts.service".
+#
+# sudo loginctl enable-linger pi
+# systemctl --user import-environment PATH
+# systemctl --user enable power-alerts
+
+[Unit]
+Description=UPS Monitoring Alert Process
+After=network.target
+After=nut-server.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/iot-stuff/power-alerts
+ExecStart=/home/pi/iot-stuff/power-alerts/do-alerts
+Environment="PATH=/home/pi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=default.target
