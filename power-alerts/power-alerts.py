@@ -75,10 +75,12 @@ assert(isinstance(DISCORD_WEBHOOK, str))
 assert(isinstance(DISCORD_RECIPIENT, str))
 
 interesting_fields = [
+    "device.model",
     "ups.status",
     "ups.load",
     "input.voltage",
     "input.transfer.reason",
+    "battery.charge",
     "battery.runtime",
     "battery.voltage"
 ]
@@ -118,10 +120,8 @@ while True:
             ]
         }
 
-        r = req = rs.post(DISCORD_WEBHOOK, json=msg)
-        
         # Notify.
-        pass
+        r = req = rs.post(DISCORD_WEBHOOK, json=msg)
 
     ups_status = new_ups_status
     time.sleep(10)
