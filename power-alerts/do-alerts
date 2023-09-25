@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Switch to the script's directory.
+cd "$(dirname "$0")"
+
 export DISCORD_WEBHOOK=https://discord.com/api/webhooks/xxx/yyy
 export DISCORD_RECIPIENT="<@&zzz>: "
 
