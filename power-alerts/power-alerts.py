@@ -106,10 +106,10 @@ while True:
     
     if ups_status != new_ups_status:
         msg = {
-            "content": ups_name + ": " + describe_ups_status(new_ups_status) + " \u2B05\uFE0F " + describe_ups_status(ups_status) + " - " + DISCORD_RECIPIENT,
+            "content": ups_name + ": " + describe_ups_status(new_ups_status),
             "embeds": [
                 {
-                    "title": "Status Change: " + ups_name,
+                    "title": "Status Change (" + ups_name + "): " + ups_status + " \u27A1\uFE0F " + new_ups_status,
                     "color": color,
                     "fields": [{"name": k, "inline": True, "value": ups_vars.get(k, "")} for k in interesting_fields],
                     "thumbnail": {
