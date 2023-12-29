@@ -6,7 +6,7 @@ import typing
 import time
 import requests
 import os
-import netutils
+from .. import notifier
 
 _re_var_value = re.compile(R'VAR ([^ ]+) ([^ ]+) "(.*)"')
 
@@ -90,7 +90,7 @@ ups_name = "apc-1"
 ups_status : typing.Optional[str] = "Unknown"
 
 rs = requests.Session()
-rs.mount("https://", netutils.AlternateInterfaceAdapter("usb0"))
+rs.mount("https://", notifier.AlternateInterfaceAdapter("usb0"))
 
 while True:
     ups_vars = nnc.list_vars(ups_name)
