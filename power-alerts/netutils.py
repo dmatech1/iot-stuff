@@ -9,7 +9,17 @@ SO_BINDTODEVICE = 25
 SIOCGIFADDR = 0x8915
 
 class AlternateInterfaceAdapter(requests.adapters.HTTPAdapter):
-    """Simple adapter that uses the specified network interface for requests."""
+    """
+    Simple adapter that uses the specified IPv4 network interface for requests.
+    The idea and implementation are based on SocketOptionsAdapter and
+    SourceAddressAdapter in the "requests_toolbelt" package.
+
+    This is currently specific to Linux and IPv4.  Extending this to Windows
+    might require using the IP_UNICAST_IF or IPV6_UNICAST_IF socket options
+    instead of SO_BINDTODEVICE.  Plus, the interface management functions are
+    totally different.  But since I'm only using IPv4 on a Raspberry Pi 4
+    for this project, this isn't necessary.
+    """
 
     def __init__(self, if_name: str, **kwargs):
         self.if_name = if_name
@@ -24,7 +34,9 @@ class AlternateInterfaceAdapter(requests.adapters.HTTPAdapter):
             addr = socket.inet_ntoa(fcntl.ioctl(s.fileno(), SIOCGIFADDR, struct.pack('256s', if_name_bytes))[20:24])
             print(addr)
 
-        # This is specific to Linux.  I've only seen it used in "curl".
+        # This is specific to Linux.  I've only seen it used in "curl".  If you
+        # use "ip rule" and "ip route" correctly, this step is unnecessary.
+        # See: https://github.com/curl/curl/blob/2683de3078eadc86d9b182e7417f4ee75a247e2c/lib/cf-socket.c#L448-L469
         socket_options = [
             (socket.SOL_SOCKET, SO_BINDTODEVICE, if_name_bytes + b'\x00')
         ]
